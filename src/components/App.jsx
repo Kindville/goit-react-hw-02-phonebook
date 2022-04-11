@@ -1,61 +1,68 @@
 import { Component } from "react";
-import {ContactForm} from "components/ContactForm"
+import { ContactForm } from "components/ContactForm"
+import { ContactList } from "components/ContactList"
+import { Filter } from "components/Filter"
+import {Container} from "components/App.styled"
 import { nanoid } from 'nanoid'
 
 export class App extends Component {
   state = {
     contacts: [],
-    filter:'',
+    filter: '',
   } 
-    nameInputId = nanoid();
-  numberInputId = nanoid();
-  
-  addContact = ({name, number}) => {
-    
-    const newContact = [...this.state.contacts]
-    newContact.push(this.state.name)
-    this.setState({ contacts: newContact })
-    // e.target.reset()
-  }
-  handleDelete = index => {
-    // console.log(index);
-    const newArray= this.state.contacts.filter((contact, i) => i!== index)
-    // console.log(deleteElm);
-    this.setState({contacts: newArray})
-  }
-  
+  addContact = ({ name, number }) => {
+    const { contacts } = this.state
+    const newContact = { id: nanoid(), name, number }
+        
+    contacts.some(contact => contact.name === name) ?
+      alert(`${name} is already exist`) :
+     
+      this.setState(({ contacts }) => ({
+        contacts: [newContact, ...contacts],
+      })
+      )
+  };
 
-/*/**
- * 
-contacts = [
-  {
-  name: 'Jack'
-  number: '444-333'
-  },
-   {
-  name: 'John'
-  number: '141-333'
-  }
-]
-create Object
-const Obj = {}
-Obj.name = e.target.value (this.state.name)
-Obj.number= this.state.number
- */
+  changeFilter = (filter) => {
+    this.setState({ filter });
+  };
+
+  getContacts = () => {
+    const { contacts, filter } = this.state;
+
+    return contacts.filter((contacts) =>
+      contacts.name.toLowerCase().includes(filter.toLowerCase())
+    );
+  };
+
+  deleteContact = (contactId) => {
+    this.setState((prevState) => {
+      return {
+        contacts: prevState.contacts.filter(({ id }) => id !== contactId),
+      };
+    });
+  };
+
   render() {
-    return (
-      <div> 
-      <h2> Phonebook </h2>
-        <ContactForm
-          onSubmit={this.addContact}
-        />
-         <h2> Contacts </h2>
-        <ul> 
-         {this.state.contacts.map((contact, index)=> <li key={index}>{contact} <button type='button' onClick={()=> this.handleDelete(index)}> Delete</button> </li>)  } 
-        </ul>
+    const { filter } = this.state;
+    const visibleContacts = this.getContacts();
 
-        </div>
-    )
+    return (
+      <Container>
+        <h1>Phonebook</h1>
+
+        <ContactForm onAddContact={this.addContact} />
+        <h2>Contacts</h2>
+        {visibleContacts.length > 1 && (
+          <Filter value={filter} changeFilter={this.changeFilter} />
+        )}
+        {visibleContacts.length > 0 && (
+          <ContactList
+            contacts={visibleContacts}
+            deleteContact={this.deleteContact}
+          />
+        )}
+      </Container>
+    );
   }
- 
-};
+}
