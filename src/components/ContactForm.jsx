@@ -50,7 +50,7 @@ export class ContactForm extends Component {
         <Name >
           Number
           <Input
-            type="text"
+            type="tel"
             name="number"
             value={this.state.number}
               onChange={this.handleChange}
